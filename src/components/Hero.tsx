@@ -3,9 +3,12 @@
 import Image from 'next/image';
 import { FaEnvelope, FaPhone, FaLinkedin, FaMapMarkerAlt } from 'react-icons/fa';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 export default function Hero() {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
     const ref = useRef(null);
     const { scrollYProgress } = useScroll({
         target: ref,
@@ -20,11 +23,16 @@ export default function Hero() {
     const opacity = useTransform(springScroll, [0, 0.6], [1, 0]);
     const rotate = useTransform(springScroll, [0, 1], [0, 15]);
 
+    // Use stable values for SSR to prevent hydration mismatch
+    const animatedStyle = mounted ? { opacity } : { opacity: 1 };
+    const parallaxStyle = mounted ? { y: yText, opacity } : { opacity: 1 };
+    const imageStyle = mounted ? { y: yImage, scale: scaleImage, opacity, rotateZ: rotate } : { opacity: 1 };
+
     return (
         <header className="hero" ref={ref} style={{ perspective: '1000px' }}>
             <div className="container" style={{ position: 'relative', zIndex: 1 }}>
                 <motion.div
-                    style={{ y: yImage, scale: scaleImage, opacity, rotateZ: rotate }}
+                    style={imageStyle}
                     initial={{ opacity: 0, scale: 0.3, rotateY: -45 }}
                     animate={{ opacity: 1, scale: 1, rotateY: 0 }}
                     transition={{ duration: 1.2, type: "spring", bounce: 0.4 }}
@@ -40,7 +48,7 @@ export default function Hero() {
                 </motion.div>
 
                 <motion.h1
-                    style={{ y: yText, opacity }}
+                    style={parallaxStyle}
                     initial={{ opacity: 0, y: 50, filter: 'blur(10px)' }}
                     animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                     transition={{ delay: 0.3, duration: 1, ease: 'easeOut' }}
@@ -50,7 +58,7 @@ export default function Hero() {
 
                 <motion.div
                     className="contact-info"
-                    style={{ y: yText, opacity }}
+                    style={parallaxStyle}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6, duration: 1 }}

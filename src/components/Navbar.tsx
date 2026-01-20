@@ -14,22 +14,23 @@ const navItems = [
 export default function Navbar() {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        return scrollY.onChange((latest) => {
-            setIsScrolled(latest > 50);
-        });
-    }, [scrollY]);
+        setMounted(true);
+        // Use the newer .on("change") if available, or fall back to onChange
+        const unsubscribe = scrollY.on ?
+            scrollY.on("change", (latest) => setIsScrolled(latest > 50)) :
+            (scrollY as any).onChange((latest: number) => setIsScrolled(latest > 50));
 
-    // Spring physics for smooth expansion
-    // const width = useSpring(isScrolled ? 10 : 90, { stiffness: 300, damping: 30 });
-    // Actually, let's keep it simpler for now - just background change interaction
+        return () => unsubscribe();
+    }, [scrollY]);
 
     return (
         <>
             <motion.nav
                 className="navbar"
-                style={{ top: isScrolled ? '1rem' : '2rem' }}
+                style={{ top: mounted && isScrolled ? '1rem' : '2rem' }}
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5, duration: 0.5, type: 'spring' }}
@@ -42,7 +43,6 @@ export default function Navbar() {
                     ))}
                 </div>
             </motion.nav>
-
         </>
     );
 }

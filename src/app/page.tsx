@@ -12,10 +12,14 @@ import VolunteerCard from '@/components/VolunteerCard';
 import ChatWidget from '@/components/ChatWidget';
 import CallToAction from '@/components/CallToAction';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { FaGoogle, FaMicrosoft, FaTasks, FaSearch, FaChalkboardTeacher, FaUsers, FaLightbulb, FaBullhorn, FaHandshake, FaFileAlt, FaGlobe } from 'react-icons/fa';
 import { SiCanva, SiLinkedin } from 'react-icons/si';
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const { scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
@@ -28,16 +32,19 @@ export default function Home() {
   const blob2Scale = useTransform(smoothProgress, [0, 0.3, 0.7, 1], [1, 1.4, 2, 1.5]);
   const blob2Rotate = useTransform(smoothProgress, [0, 1], [0, -240]);
 
+  const blob1Style = mounted ? { y: blob1Y, scale: blob1Scale, rotate: blob1Rotate } : { opacity: 0 };
+  const blob2Style = mounted ? { y: blob2Y, scale: blob2Scale, rotate: blob2Rotate } : { opacity: 0 };
+
   return (
     <>
       {/* Morphing Background Components */}
       <motion.div
         className="morph-blob blob-1"
-        style={{ y: blob1Y, scale: blob1Scale, rotate: blob1Rotate }}
+        style={blob1Style}
       />
       <motion.div
         className="morph-blob blob-2"
-        style={{ y: blob2Y, scale: blob2Scale, rotate: blob2Rotate }}
+        style={blob2Style}
       />
 
       <div className="bg-texture" />
